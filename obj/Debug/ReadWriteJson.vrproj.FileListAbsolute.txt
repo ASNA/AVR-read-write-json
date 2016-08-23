@@ -1,0 +1,7 @@
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\bin\Debug\ReadWriteJson.exe
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\obj\Debug\ReadWriteJson.vrprojResolveAssemblyReference.cache
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\bin\Debug\ReadWriteJson.pdb
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\bin\Debug\Newtonsoft.Json.pdb
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\bin\Debug\Newtonsoft.Json.xml
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\obj\Debug\ReadWriteJson.exe
+C:\Users\roger\Documents\Programming\AVR\Other\ReadWriteJson\ReadWriteJson\obj\Debug\ReadWriteJson.pdb

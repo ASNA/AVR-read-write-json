@@ -1,0 +1,166 @@
+﻿/*
+ |  Read and write JSON with ASNA Visual RPG. 
+ |
+ |  This project accompanies this article: https://asna.com/us/tech/kb/doc/read-write-json
+ |
+ |  This project writes some Json to your local drive. It's also handy to use the debugger with this code 
+ |  to see what's happening. 
+ |
+ |  In the WorkWithJson class below you'll need to change the TEST_JSON_PATH to a folder for which 
+ |  your Windows profile has read/write authority. There is a test.json in this file project. Be sure to 
+ |  move test.json to that folder before running this program. 
+*/
+
+Using System
+Using System.Collections
+Using System.Text
+
+BegClass Program
+	BegSr Main Shared(*Yes) Access(*Public) Attributes(System.STAThread())
+		DclSrParm args Type(*String) Rank(1)
+
+        DclFld t Type(WorkWithJson) 
+
+        t = *New WorkWithJson()
+
+        t.ReadJsonWithJObject()
+        t.ReadJsonWithDeserialization()
+        t.WriteWithWriter()
+        t.WriteWithSerialization()
+
+        Console.WriteLine('Press any key to continue...')
+        Console.ReadKey()
+	EndSr
+EndClass
+
+BegClass WorkWithJson
+    // Change this constant to a folder for which your Windows profile 
+    // has read/write authority. 
+    DclConst TEST_JSON_PATH Value('c:\users\roger\documents\')
+
+    BegSr ReadJsonWithJObject Access(*Public) 
+        DclFld Cores Type(*Integer4) 
+        DclFld CPU Type(*String) 
+        DclFld Drives Type(NewtonSoft.Json.Linq.JArray) 
+        DclFld Drive Type(*String) 
+        DclFld i Type(*Integer4) 
+        DclFld Json Type(*String) 
+        DclFld JsonObject Type(NewtonSoft.Json.Linq.JObject)
+        DclFld Street Type(*String) 
+        DclFld ZipCode Type(*Integer4) 
+
+        // Get raw Json.         
+        Json = System.IO.File.ReadAllText(TEST_JSON_PATH + 'test.json') 
+
+        JsonObject = NewtonSoft.Json.Linq.JObject.Parse(Json) 
+
+        CPU = JsonObject['CPU'].ToString()
+        Cores = Convert.ToInt32(JsonObject['Cores']) 
+         
+        Drives = JsonObject['Drives'] *As NewtonSoft.Json.Linq.JArray
+
+        CPU = Drives[0I].ToString() // Note coercion of 0 literal to long integer.
+
+        For Index(i = 0) To(Drives.Count - 1)
+            Drive = Drives[i].ToString() 
+            Console.WriteLine(Drive)             
+        EndFor 
+
+        Street = JsonObject['Manufacturer']['Street'].ToString()
+        ZipCode = Convert.ToInt32(JsonObject['Manufacturer']['ZipCode'])
+    EndSr
+
+    BegSr ReadJsonWithDeserialization Access(*Public) 
+        DclFld Json Type(*String) 
+        DclFld d Type(DriveDefinition)
+        
+        // Get raw Json.         
+        Json = System.IO.File.ReadAllText(TEST_JSON_PATH + 'test.json') 
+
+        // Reconstitute object.
+        d = NewtonSoft.Json.JsonConvert.DeserializeObject(Json, *TypeOf(DriveDefinition)) *As DriveDefinition 
+    EndSr
+    
+    BegSr WriteWithWriter Access(*Public)
+        DclFld sb Type(StringBuilder) New()
+        DclFld sw Type(System.IO.StringWriter) 
+
+        sw = *New System.IO.StringWriter(sb) 
+        
+        BegUsing writer Type(NewtonSoft.Json.JsonTextWriter) Value(*New NewtonSoft.Json.JsonTextWriter(sw))
+            writer.Formatting = NewtonSoft.Json.Formatting.Indented
+            writer.WriteStartObject()
+
+            writer.WritePropertyName('CPU')
+            writer.WriteValue('Intel')
+
+            writer.WritePropertyName('Cores')
+            writer.WriteValue(8i)
+
+            writer.WritePropertyName('Drives')
+            writer.WriteStartArray()
+                writer.WriteValue('DVD read/writer')
+                writer.WriteValue('1TB Sata 7200')
+                writer.WriteValue('250GB SSD')
+            writer.WriteEndArray()
+
+            writer.WritePropertyName('Manufacturer')
+            writer.WriteStartObject()
+                writer.WritePropertyName('Name')
+                writer.WriteValue('Bob''s Drives') 
+                writer.WritePropertyName('Street')
+                writer.WriteValue('331 Jefferson') 
+                writer.WritePropertyName('City')
+                writer.WriteValue('Gas City') 
+                writer.WritePropertyName('State')
+                writer.WriteValue('IN') 
+                writer.WritePropertyName('ZipCode')
+                writer.WriteValue(78216I) 
+            writer.WriteEndObject()
+
+            writer.WriteEndObject()
+        EndUsing 
+
+        Console.WriteLine('New Json:')
+        Console.WriteLine(sb.ToString())
+
+        System.IO.File.WriteAllText(TEST_JSON_PATH + 'new-test.json', sb.ToString())
+    EndSr
+
+    BegSr WriteWithSerialization Access(*Public)
+        DclFld Drive Type(DriveDefinition) New() 
+        DclFld Json Type(*String) 
+
+        Drive.CPU = 'Intel'
+        Drive.Cores = 8 
+        Drive.Drives = *New *String[] {'DVD read/writer', '1TB Sata 7200', '250GB SSD'}
+        Drive.Manufacturer.Name = 'Bob''s Drives'
+        Drive.Manufacturer.Street = '331 Jefferson'
+        Drive.Manufacturer.City = 'Gas City'
+        Drive.Manufacturer.State = 'IN'
+        Drive.Manufacturer.ZipCode = 78216
+
+        Json = NewtonSoft.Json.JsonConvert.SerializeObject(Drive, NewtonSoft.Json.Formatting.Indented) 
+        System.IO.File.WriteAllText(TEST_JSON_PATH + 'new-test2.json', Json)
+    EndSr
+EndClass
+
+BegClass DriveDefinition
+    DclProp CPU Type(*String) Access(*Public) 
+    DclProp Cores Type(*Integer4)  Access(*Public) 
+    DclProp Drives Type(*String) Rank(1)  Access(*Public) 
+    DclProp Manufacturer Type(PartManufacturer) Access(*Public)
+
+    BegConstructor Access(*Public) 
+        *This.Manufacturer = *New PartManufacturer()         
+    EndConstructor 
+
+EndClass 
+
+BegClass PartManufacturer
+    DclProp Name Type(*String)  Access(*Public) 
+    DclProp Street Type(*String)  Access(*Public) 
+    DclProp City Type(*String)  Access(*Public) 
+    DclProp State Type(*String)  Access(*Public) 
+    DclProp ZipCode Type(*String)  Access(*Public) 
+EndClass
